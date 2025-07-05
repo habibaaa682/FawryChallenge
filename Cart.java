@@ -5,27 +5,23 @@ public class Cart {
     private List<CartItem> items = new ArrayList<>();
     public void add(Product product, int quantity) {
         if (quantity > product.getQuantity()) {
-            System.out.println("Not enough stock for " + product.getName());
-            return;
+            throw new IllegalArgumentException("Not enough stock for " + product.getName());
         }
         items.add(new CartItem(product, quantity));
     }
     public void checkout(Customer customer) {
         if (items.isEmpty()) {
-            System.out.println("Cart is empty.");
-            return;
+            throw new IllegalStateException("Cart is empty");
         }
         double subtotal = 0;
         List<ShippableItem> shippableItems = new ArrayList<>();
         for (CartItem item : items) {
             Product p = item.getProduct();
             if (p.isExpired()) {
-                System.out.println("Product " + p.getName() + " is expired.");
-                return;
+                throw new IllegalStateException("Product " + p.getName() + " is expired");
             }
             if (item.getQuantity() > p.getQuantity()) {
-                System.out.println("Not enough stock for " + p.getName());
-                return;
+                throw new IllegalStateException("Not enough stock for " + p.getName());
             }
             subtotal += p.getPrice() * item.getQuantity();
             if (p.isShippable()) {
@@ -35,8 +31,7 @@ public class Cart {
         double shippingFees = shippableItems.isEmpty() ? 0 : 30;
         double total = subtotal + shippingFees;
         if (customer.getBalance() < total) {
-            System.out.println("Insufficient balance");
-            return;
+            throw new IllegalStateException("Insufficient balance!");
         }
         for (CartItem item : items) {
             item.getProduct().reduceQuantity(item.getQuantity());
